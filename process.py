@@ -1,6 +1,7 @@
 import argparse
 import cv2
 import numpy as np
+from color_processing import lose_intensity
 
 
 if __name__ == '__main__':
@@ -24,6 +25,8 @@ if __name__ == '__main__':
     cv2.namedWindow('Original', cv2.WINDOW_NORMAL)
     cv2.namedWindow('Processed', cv2.WINDOW_NORMAL)
 
+    hsv_hist = np.zeros((16, 16, 16), dtype=np.uint64)
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -34,6 +37,11 @@ if __name__ == '__main__':
 
         # perspective transform
         dst = cv2.warpPerspective(undistorted, pt_data['matrix'], tuple(pt_data['target_size']), flags=cv2.INTER_CUBIC)
+
+        # convert colors
+        dst = lose_intensity(dst)
+
+        hist = cv2.calcHist([dst], [0, 1, 2])
 
         # write data
         out.write(dst)

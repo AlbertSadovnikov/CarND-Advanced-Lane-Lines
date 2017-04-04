@@ -39,11 +39,9 @@ image = cv2.undistort(image, data['matrix'], data['distortion'])
 sl, il, ml, xl = get_line(image.copy(), 'Put points on the left line')
 sr, ir, mr, xr = get_line(image.copy(), 'Put points on the right line')
 
-y0, y1 = min(ml, mr), max(xl, xr)
+y0, y1 = 470, 670
 x00, x10 = sl*y0 + il, sl*y1 + il
 x01, x11 = sr*y0 + ir, sr*y1 + ir
-cv2.line(image, (int(x00), y0), (int(x10), y1), (0, 255, 0), 2)
-cv2.line(image, (int(x01), y0), (int(x11), y1), (0, 255, 0), 2)
 
 
 lane_width = 256
@@ -58,6 +56,15 @@ M = cv2.getPerspectiveTransform(pts0, pts1)
 dst = cv2.warpPerspective(image, M, target_size, flags=cv2.INTER_CUBIC)
 cv2.namedWindow('birds_eye', cv2.WINDOW_NORMAL)
 cv2.imshow('birds_eye', dst)
+
+
+cv2.namedWindow('Lane', cv2.WINDOW_NORMAL)
+cv2.line(image, (int(x00), y0), (int(x10), y1), (0, 255, 0), 2)
+cv2.line(image, (int(x01), y0), (int(x11), y1), (0, 255, 0), 2)
+cv2.line(image, (int(x00), y0), (int(x01), y0), (0, 255, 0), 2)
+cv2.line(image, (int(x10), y1), (int(x11), y1), (0, 255, 0), 2)
+cv2.imshow('Lane', image)
+
 
 np.savez('perspective', matrix=M, target_size=target_size, pts0=pts0, pts1=pts1, source_size=image.shape[:2])
 
