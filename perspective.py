@@ -42,12 +42,12 @@ sr, ir, mr, xr = get_line(image.copy(), 'Put points on the right line')
 y0, y1 = min(ml, mr), max(xl, xr)
 x00, x10 = sl*y0 + il, sl*y1 + il
 x01, x11 = sr*y0 + ir, sr*y1 + ir
-# cv2.line(image, (int(x00), y0), (int(x10), y1), (0, 255, 0), 2)
-# cv2.line(image, (int(x01), y0), (int(x11), y1), (0, 255, 0), 2)
+cv2.line(image, (int(x00), y0), (int(x10), y1), (0, 255, 0), 2)
+cv2.line(image, (int(x01), y0), (int(x11), y1), (0, 255, 0), 2)
 
 
 lane_width = 256
-x_margin = 64
+x_margin = 128
 lane_length = 256
 pts0 = np.array([[x00, y0], [x10, y1],
                  [x01, y0], [x11, y1]], np.float32)
