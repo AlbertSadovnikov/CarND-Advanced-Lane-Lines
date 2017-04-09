@@ -3,7 +3,7 @@ import cv2
 import glob
 
 np.set_printoptions(precision=4, suppress=True)
-display = False
+display = True
 
 point_grid = (9, 6)
 # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
