@@ -35,13 +35,16 @@ if __name__ == '__main__':
         # undistort
         undistorted = cv2.undistort(frame, cal_data['matrix'], cal_data['distortion'])
 
+        # color
+
+
         # perspective transform
-        dst = cv2.warpPerspective(undistorted, pt_data['matrix'], tuple(pt_data['target_size']), flags=cv2.INTER_CUBIC)
+        # dst = cv2.warpPerspective(undistorted, pt_data['matrix'], tuple(pt_data['target_size']), flags=cv2.INTER_CUBIC)
 
         # convert colors
-        dst = lose_intensity(dst)
+        # dst = lose_intensity(dst)
 
-        hist = cv2.calcHist([dst], [0, 1, 2])
+        # hist = cv2.calcHist([dst], [0, 1, 2])
 
         # write data
         out.write(dst)
