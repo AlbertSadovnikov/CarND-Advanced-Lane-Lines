@@ -6,8 +6,6 @@ import sys
 import matplotlib.pyplot as plt
 from plotting import imagesc
 
-
-
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--input')
@@ -63,7 +61,7 @@ if __name__ == '__main__':
         angle = np.arctan2(sobelx, sobely)
 
         # perspective transform
-        # dst = cv2.warpPerspective(undistorted, pt_data['matrix'], tuple(pt_data['target_size']), flags=cv2.INTER_CUBIC)
+        dst = cv2.warpPerspective(undistorted, pt_data['matrix'], tuple(pt_data['target_size']), flags=cv2.INTER_CUBIC)
 
         # convert colors
         # dst = lose_intensity(dst)

@@ -18,7 +18,7 @@ def model(input_size):
     return m
 
 filename = 'test_images/straight_lines1.jpg'
-
+hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS
 
 # img = cv2.imread(filename)
 
