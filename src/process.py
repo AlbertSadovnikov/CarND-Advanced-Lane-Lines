@@ -5,6 +5,7 @@ from plotting import imagesc
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import svm
 
 """
 
@@ -18,7 +19,7 @@ def preprocess(img, cal, pt):
 
 
 def extract_features(img):
-    n_features = 2
+    n_features = 3
     hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
     feat = np.zeros((img.shape[0], img.shape[1], n_features))
     # feature 0, lightness, scaled to 0.0 to 1.0
@@ -26,8 +27,8 @@ def extract_features(img):
     # feature 1, saturation, scaled to 0.0 to 1.0
     feat[:, :, 1] = hls[:, :, 2].astype(np.float) / 255
     # feature 2, y coordinate, scaled
-#    for row_num in range(img.shape[0]):
-#        feat[row_num, :, 2] = row_num / img.shape[0]
+    for row_num in range(img.shape[0]):
+        feat[row_num, :, 2] = row_num / img.shape[0]
     # feature 3, sobel magnitude on lightness, smoothed
     # feature 4, sobel magnitude on saturation, smoothed
 
@@ -43,8 +44,8 @@ if __name__ == '__main__':
               ('test_images/test5.jpg', 'train_images/test5.png'),
               ('test_images/straight_lines1.jpg', 'train_images/straight_lines1.png')]
 
-    image_filename = images[2][0]
-    mask_filename = images[2][1]
+    image_filename = images[1][0]
+    mask_filename = images[1][1]
     # load image
     image = preprocess(cv2.imread(image_filename), cal_data, pt_data)
     # load mask
@@ -62,17 +63,18 @@ if __name__ == '__main__':
         cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
         imagesc(win_name, f[:, :, idx])
 
-    dt = DecisionTreeClassifier()
+    # dt = DecisionTreeClassifier()
+    dt = svm.LinearSVC(class_weight='balanced')
     x_data = f.reshape(-1, f.shape[-1])
     y_data = mask.flatten() > 0.5
     dt.fit(x_data, y_data)
 
-    res = dt.predict_proba(f.reshape(-1, f.shape[-1]))
+    res = dt.predict(f.reshape(-1, f.shape[-1]))
     cv2.namedWindow('Result', cv2.WINDOW_NORMAL)
-    imagesc('Result', res[:, 1].reshape(mask.shape))
+    imagesc('Result', res.reshape(mask.shape))
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    
+
 
