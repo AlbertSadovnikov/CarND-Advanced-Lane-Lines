@@ -25,8 +25,13 @@ def extract_features(img):
     feat[:, :, 0] = hls[:, :, 1].astype(np.float) / 255
     # feature 1, saturation, scaled to 0.0 to 1.0
     feat[:, :, 1] = hls[:, :, 2].astype(np.float) / 255
-    return feat
+    # feature 2, y coordinate, scaled
+#    for row_num in range(img.shape[0]):
+#        feat[row_num, :, 2] = row_num / img.shape[0]
+    # feature 3, sobel magnitude on lightness, smoothed
+    # feature 4, sobel magnitude on saturation, smoothed
 
+    return feat
 
 if __name__ == '__main__':
     # load calibration data
@@ -38,8 +43,8 @@ if __name__ == '__main__':
               ('test_images/test5.jpg', 'train_images/test5.png'),
               ('test_images/straight_lines1.jpg', 'train_images/straight_lines1.png')]
 
-    image_filename = images[0][0]
-    mask_filename = images[0][1]
+    image_filename = images[2][0]
+    mask_filename = images[2][1]
     # load image
     image = preprocess(cv2.imread(image_filename), cal_data, pt_data)
     # load mask
@@ -68,4 +73,6 @@ if __name__ == '__main__':
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    
 
