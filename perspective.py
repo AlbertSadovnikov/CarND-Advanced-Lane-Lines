@@ -1,9 +1,8 @@
 import cv2
 import numpy as np
 
-
 """
-This script is used for selecting a set of points on each lane lines (left then right) and
+This script is used for selecting a set of points on each lane line (left then right) and
 estimating perspective transform after fitting the lines.
 """
 
@@ -34,13 +33,14 @@ def get_line(img, text):
     max_y = np.max(points[:, 1])
     return mlx, clx, min_y, max_y
 
+
 if __name__ == '__main__':
     try:
-        filename = 'test_images/straight_lines1.jpg'
+        filename = 'test_images/straight_lines2.jpg'
         # load image
         image = cv2.imread(filename)
         # load calibration file
-        data = np.load('calibration.npz')
+        data = np.load('data/calibration.npz')
         # undistort
         image = cv2.undistort(image, data['matrix'], data['distortion'])
 
@@ -61,8 +61,8 @@ if __name__ == '__main__':
         target_size = (lane_width + 2 * x_margin, lane_length)
         M = cv2.getPerspectiveTransform(pts0, pts1)
         dst = cv2.warpPerspective(image, M, target_size, flags=cv2.INTER_CUBIC)
-        cv2.namedWindow('birds_eye', cv2.WINDOW_NORMAL)
-        cv2.imshow('birds_eye', dst)
+        cv2.namedWindow('Birds eye', cv2.WINDOW_NORMAL)
+        cv2.imshow('Birds eye', dst)
 
         cv2.namedWindow('Lane', cv2.WINDOW_NORMAL)
         cv2.line(image, (int(x00), y0), (int(x10), y1), (0, 255, 0), 2)
@@ -74,8 +74,8 @@ if __name__ == '__main__':
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     except IndexError as ex:
-        print('Exception : ', ex)
+        print('Exception: ', ex)
     else:
         out_file_name = 'data/perspective'
         np.savez(out_file_name, matrix=M, target_size=target_size, pts0=pts0, pts1=pts1, source_size=image.shape[:2])
-        print('Saved perspective transform data in %s.npz'% out_file_name)
+        print('Saved perspective transform data in %s.npz' % out_file_name)

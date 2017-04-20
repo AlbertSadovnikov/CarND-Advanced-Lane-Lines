@@ -6,10 +6,10 @@ import glob
 This script is used to estimate camera distortion parameters.
 """
 
+DISPLAY = False
 
 if __name__ == '__main__':
     np.set_printoptions(precision=4, suppress=True)
-    display = False
 
     point_grid = (9, 6)
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     images = glob.glob('camera_cal/calibration*.jpg')
 
-    if display:
+    if DISPLAY:
         cv2.namedWindow('img', cv2.WINDOW_NORMAL)
 
     # Step through the list and search for chessboard corners
@@ -47,7 +47,7 @@ if __name__ == '__main__':
             image_points.append(corners)
 
             # Draw and display the corners
-            if display:
+            if DISPLAY:
                 img = cv2.drawChessboardCorners(img, point_grid, corners, ret)
                 cv2.imshow('img', img)
                 cv2.waitKey(0)
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     np.savez(out_file_name, matrix=mtx, distortion=dist)
     print('Saved calibration data to %s.npz' % out_file_name)
 
-    if display:
+    if DISPLAY:
         cv2.destroyAllWindows()
 
 
