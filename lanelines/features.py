@@ -8,21 +8,8 @@ def roll(img, roll_x, roll_y):
     return ry
 
 
-def color(img):
-    n_features = 2
-    hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
-    l, s = hls[:, :, 1], hls[:, :, 2]
-    feat = np.zeros((img.shape[0], img.shape[1], n_features))
-    # lightness
-    feat[:, :, 0] = l.astype(np.float32) / 255
-    # saturation
-    feat[:, :, 1] = s.astype(np.float32) / 255
-    return feat
-
-
 def sobel(img):
-    n_features = 2
-    feat = np.zeros((img.shape[0], img.shape[1], n_features))
+    feat = np.zeros((img.shape[0], img.shape[1], 2))
     # sobel x direction, kernel size 5
     slx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=5)
     feat[:, :, 0] = slx
@@ -32,20 +19,28 @@ def sobel(img):
     return feat
 
 
+n_features = 37  # update this value, if you change the extract method
+
+
 def extract(img):
-    feature_list = []
-    # get color features
-    cf = color(img)
-    # append to feature list
-    feature_list.append(cf)
+    # convert to HLS color space
+    hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+    lightness, saturation = hls[:, :, 1], hls[:, :, 2]
 
-    # compute sobel features
-    for idx in range(cf.shape[2]):
-        sample = cf[:, :, idx]
-        sf = sobel(sample)
-        feature_list.append(sf)
+    # compute sobel features for lightness
+    sobel_lightness = sobel(lightness)
 
-    return np.concatenate(feature_list, axis=2)
+    # compute sobel for saturation channel
+    sobel_saturation = sobel(saturation)
+
+    # get shifted sobel features
+    sobel_lightness_shifted = shift(sobel_lightness, [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0),
+                                                      (-3, 3), (3, -3), (3, 3), (-3, -3)])
+    sobel_saturation_shifted = shift(sobel_saturation, [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0),
+                                                        (-3, 3), (3, -3), (3, 3), (-3, -3)])
+
+    # combine features
+    return np.concatenate((saturation[:, :, np.newaxis], sobel_lightness_shifted, sobel_saturation_shifted), axis=2)
 
 
 def shift(features, roll_list):

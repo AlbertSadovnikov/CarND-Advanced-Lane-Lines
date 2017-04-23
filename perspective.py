@@ -52,7 +52,7 @@ if __name__ == '__main__':
         x01, x11 = sr * y0 + ir, sr * y1 + ir
 
         lane_width = 256
-        x_margin = 96
+        x_margin = 160
         lane_length = 256
         pts0 = np.array([[x00, y0], [x10, y1],
                          [x01, y0], [x11, y1]], np.float32)

@@ -3,18 +3,21 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 import lanelines.features as features
 from lanelines.plotting import imagesc
 
 
 """
-
+This script is used for training binarization classifier
 """
+
+DISPLAY_TEST_IMAGES = True
 
 
 def preprocess(img, cal, pt):
     undistorted = cv2.undistort(img, cal['matrix'], cal['distortion'])
-    transformed = cv2.warpPerspective(undistorted, pt['matrix'], tuple(pt['target_size']), flags=cv2.INTER_NEAREST)
+    transformed = cv2.warpPerspective(undistorted, pt['matrix'], tuple(pt['target_size']), flags=cv2.INTER_LANCZOS4)
     return transformed
 
 
@@ -37,7 +40,7 @@ if __name__ == '__main__':
               ('train_images/harder_challenge_0002.png', 'train_images/harder_challenge_0002_mask.png'),
               ('train_images/harder_challenge_0003.png', 'train_images/harder_challenge_0003_mask.png')]
 
-    x_data = np.empty((0, 30), np.float)
+    x_data = np.empty((0, features.n_features), np.float)
     y_data = np.empty(0, np.int)
 
     # setup ml data
@@ -48,62 +51,70 @@ if __name__ == '__main__':
         mask = preprocess(cv2.cvtColor(cv2.imread(mask_filename), cv2.COLOR_BGR2GRAY), cal_data, pt_data)
         mask = cv2.normalize(mask.astype(np.float), None, 0.0, 1.0, cv2.NORM_MINMAX)
 
-        # cv2.namedWindow('Original', cv2.WINDOW_NORMAL)
-        # cv2.namedWindow('Mask', cv2.WINDOW_NORMAL)
-        # cv2.imshow('Original', image)
-        # cv2.imshow('Mask', mask)
+        # extract features
+        f = features.extract(image)
 
-        f = features.shift(features.extract(image), [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0)])
-        print(f.shape)
-        # for idx in range(f.shape[-1]):
-        #     win_name = 'Feature%d' % idx
-        #     cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
-        #     imagesc(win_name, f[:, :, idx])
-        # cv2.waitKey(0)
-        # # dt = svm.LinearSVC(class_weight='balanced')
+        # prepare data for training
         x_data_sample = f.reshape(-1, f.shape[-1])
-        y_data_sample = mask.flatten() > 0.5
+        y_data_sample = mask.flatten() > 0.75
+
+        # combine with previous
         x_data = np.concatenate([x_data, x_data_sample])
         y_data = np.concatenate([y_data, y_data_sample])
 
-    print(x_data.shape)
-    print(y_data.shape)
+        # mirror augmentation
+        mask = cv2.flip(mask, 1)
+        image = cv2.flip(image, 1)
+        f = features.extract(image)
 
-    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.2, random_state=0, stratify=y_data)
+        # prepare data for training
+        x_data_sample = f.reshape(-1, f.shape[-1])
+        y_data_sample = mask.flatten() > 0.75
 
-    # dt = DecisionTreeClassifier(max_depth=32, class_weight="balanced")
-    dt = RandomForestClassifier(n_estimators=10, max_depth=32, class_weight='balanced')
-                           # dt = svm.LinearSVC(class_weight='balanced')
+        # combine with previous
+        x_data = np.concatenate([x_data, x_data_sample])
+        y_data = np.concatenate([y_data, y_data_sample])
+
+    # train test split
+    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.1, random_state=0, stratify=y_data)
+
+    # fit classifier
+    dt = RandomForestClassifier(max_depth=24, class_weight='balanced')
     dt.fit(x_train, y_train)
-    print(dt.feature_importances_)
 
+    # get results
     y_predicted = dt.predict(x_test)
     ps = precision_score(y_test, y_predicted)
     rs = recall_score(y_test, y_predicted)
     print('Precision: %f, Recall: %f' % (ps, rs))
 
-    test_images = ['test_images/straight_lines2.jpg',
-                   'test_images/test2.jpg',
-                   'test_images/test3.jpg',
-                   'test_images/test4.jpg',
-                   'test_images/test6.jpg',
-                   'test_images/harder_challenge_0004.png',
-                   'test_images/harder_challenge_0006.png',
-                   'test_images/harder_challenge_0007.png',
-                   'test_images/harder_challenge_0008.png',
-                   'test_images/harder_challenge_0012.png']
+    # save binarizer
+    joblib.dump(dt, 'data/binarizer.clf')
 
-    cv2.namedWindow('Original', cv2.WINDOW_NORMAL)
-    cv2.namedWindow('Binary', cv2.WINDOW_NORMAL)
-    for test_filename in test_images:
-        image = preprocess(cv2.imread(test_filename), cal_data, pt_data)
-        f = features.shift(features.extract(image), [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0)])
-        res = dt.predict(f.reshape(-1, f.shape[-1]))
-        cv2.imshow('Original', image)
-        imagesc('Binary', res.reshape(image.shape[:2]))
-        cv2.waitKey(0)
+    if DISPLAY_TEST_IMAGES:
+        clf = joblib.load('data/binarizer.clf')
+        test_images = ['test_images/straight_lines2.jpg',
+                       'test_images/test2.jpg',
+                       'test_images/test3.jpg',
+                       'test_images/test4.jpg',
+                       'test_images/test6.jpg',
+                       'test_images/harder_challenge_0004.png',
+                       'test_images/harder_challenge_0006.png',
+                       'test_images/harder_challenge_0007.png',
+                       'test_images/harder_challenge_0008.png',
+                       'test_images/harder_challenge_0012.png']
 
-    cv2.destroyAllWindows()
+        cv2.namedWindow('Original', cv2.WINDOW_NORMAL)
+        cv2.namedWindow('Binary', cv2.WINDOW_NORMAL)
+        for test_filename in test_images:
+            image = preprocess(cv2.imread(test_filename), cal_data, pt_data)
+            f = features.extract(image)
+            res = clf.predict(f.reshape(-1, f.shape[-1]))
+            cv2.imshow('Original', image)
+            imagesc('Binary', res.reshape(image.shape[:2]))
+            cv2.waitKey(0)
+
+        cv2.destroyAllWindows()
 
 
 
