@@ -12,7 +12,7 @@ from lanelines.plotting import imagesc
 This script is used for training binarization classifier
 """
 
-DISPLAY_TEST_IMAGES = True
+DISPLAY_TEST_IMAGES = False
 
 
 def preprocess(img, cal, pt):
@@ -44,6 +44,7 @@ if __name__ == '__main__':
     y_data = np.empty(0, np.int)
 
     # setup ml data
+    print('Collecting data...')
     for image_filename, mask_filename in images:
         # load image
         image = preprocess(cv2.imread(image_filename), cal_data, pt_data)
@@ -76,9 +77,10 @@ if __name__ == '__main__':
         y_data = np.concatenate([y_data, y_data_sample])
 
     # train test split
-    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.1, random_state=0, stratify=y_data)
+    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.1, stratify=y_data)
 
     # fit classifier
+    print('Training classifier...')
     dt = RandomForestClassifier(max_depth=24, class_weight='balanced')
     dt.fit(x_train, y_train)
 
@@ -90,6 +92,7 @@ if __name__ == '__main__':
 
     # save binarizer
     joblib.dump(dt, 'data/binarizer.clf')
+    print('Saved trained classifier.')
 
     if DISPLAY_TEST_IMAGES:
         clf = joblib.load('data/binarizer.clf')

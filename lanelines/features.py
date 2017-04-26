@@ -19,7 +19,7 @@ def sobel(img):
     return feat
 
 
-n_features = 37  # update this value, if you change the extract method
+n_features = 25  # update this value, if you change the extract method
 
 
 def extract(img):
@@ -33,14 +33,16 @@ def extract(img):
     # compute sobel for saturation channel
     sobel_saturation = sobel(saturation)
 
+    feature_shifts = [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0)]
+    # get saturation shifted
+    saturation_shifted = shift(saturation[:, :, np.newaxis], feature_shifts)
+
     # get shifted sobel features
-    sobel_lightness_shifted = shift(sobel_lightness, [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0),
-                                                      (-3, 3), (3, -3), (3, 3), (-3, -3)])
-    sobel_saturation_shifted = shift(sobel_saturation, [(0, 0), (0, 5), (5, 0), (0, -5), (-5, 0),
-                                                        (-3, 3), (3, -3), (3, 3), (-3, -3)])
+    sobel_lightness_shifted = shift(sobel_lightness, feature_shifts)
+    sobel_saturation_shifted = shift(sobel_saturation, feature_shifts)
 
     # combine features
-    return np.concatenate((saturation[:, :, np.newaxis], sobel_lightness_shifted, sobel_saturation_shifted), axis=2)
+    return np.concatenate((saturation_shifted, sobel_lightness_shifted, sobel_saturation_shifted), axis=2)
 
 
 def shift(features, roll_list):
