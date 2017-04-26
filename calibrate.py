@@ -1,12 +1,14 @@
 import numpy as np
 import cv2
 import glob
+from os import path
 
 """
 This script is used to estimate camera distortion parameters.
 """
 
 DISPLAY = False
+GENERATE_SAMPLE_DATA = True
 
 if __name__ == '__main__':
     np.set_printoptions(precision=4, suppress=True)
@@ -33,8 +35,8 @@ if __name__ == '__main__':
 
     # Step through the list and search for chessboard corners
 
-    for filename in images:
-        img = cv2.imread(filename)
+    for file_path in images:
+        img = cv2.imread(file_path)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # Find the chessboard corners
@@ -47,13 +49,28 @@ if __name__ == '__main__':
             image_points.append(corners)
 
             # Draw and display the corners
+            img = cv2.drawChessboardCorners(img, point_grid, corners, ret)
             if DISPLAY:
-                img = cv2.drawChessboardCorners(img, point_grid, corners, ret)
                 cv2.imshow('img', img)
                 cv2.waitKey(0)
 
+            if GENERATE_SAMPLE_DATA:
+                _, filename = path.split(file_path)
+                cv2.imwrite(path.join('./output_images', 'corners_%s' % filename), img)
+
     ret, mtx, dist, rot_vectors, trans_vectors = cv2.calibrateCamera(object_points, image_points,
                                                                      image_size, None, None)
+    if GENERATE_SAMPLE_DATA:
+        for file_path in images:
+            img = cv2.imread(file_path)
+            _, filename = path.split(file_path)
+            undistorted = cv2.undistort(img, mtx, dist)
+            cv2.imwrite(path.join('./output_images', 'undistorted_%s' % filename), undistorted)
+        file_path = './train_images/harder_challenge_0001.png'
+        img = cv2.imread(file_path)
+        _, filename = path.split(file_path)
+        undistorted = cv2.undistort(img, mtx, dist)
+        cv2.imwrite(path.join('./output_images', 'undistorted_%s' % filename), undistorted)
 
     out_file_name = 'data/calibration'
     np.savez(out_file_name, matrix=mtx, distortion=dist)
@@ -61,5 +78,4 @@ if __name__ == '__main__':
 
     if DISPLAY:
         cv2.destroyAllWindows()
-
 
