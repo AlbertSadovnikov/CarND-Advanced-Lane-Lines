@@ -25,4 +25,8 @@ def process(image, cal_data, pt_data, clf, state):
     alpha = cv2.warpPerspective(alpha, inverse_transform, (image.shape[1], image.shape[0]), flags=cv2.INTER_LANCZOS4)
     lanes = cv2.warpPerspective(lanes, inverse_transform, (image.shape[1], image.shape[0]), flags=cv2.INTER_LANCZOS4)
     result = blend(image, lanes, alpha, 0.25)
+    cv2.putText(result, 'Curvature: %6.2fm' % state.curvature, (50, 100),
+                cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 1, cv2.LINE_AA)
+    cv2.putText(result, 'Displacement: %6.2fm' % state.displacement, (50, 150),
+                cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 1, cv2.LINE_AA)
     return result

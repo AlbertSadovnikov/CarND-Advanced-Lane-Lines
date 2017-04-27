@@ -13,6 +13,7 @@
 [transformed_sample]: ./output_images/transformed45512.jpg "Transformed sample"
 [thresholded_sample]: ./output_images/binary45512.jpg "Transformed sample"
 [lines_detected]: ./output_images/lines55743.jpg "Detected lines"
+[sample_result]: ./output_images/test12600.jpg "Sample result"
 
 Goal of the project is to write a software pipeline to identify the lane boundaries in a video.
 
@@ -106,3 +107,21 @@ The code can be found in [./lanelines/curves.py](./lanelines/curves.py).
 
 Sample detected lines.
 ![lines_detected]
+
+
+### Sample result
+One of the few frames more or less correctly detected from the harder challenge.
+![sample_result]
+
+### Result videos
+[./output_videos/result_project_video.mp4](./output_videos/result_project_video.mp4)
+[./output_videos/result_challenge.mp4](./output_videos/result_challenge.mp4)
+[./output_videos/result_harder_challenge_video.mp4](./output_videos/result_harder_challenge_video.mp4)
+
+# Discussion
+It was so far the hardest project in this term. Lane lines detection based on local (i.e. pixel values) seems to be hard.
+There are a lot of problems with occlusions and scenes with a lot of light.
+
+I think that employing CNNs here would give much better results, learning higher level concepts like lines, lane, etc. though training data collection can be quite time consuming.
+
+Despite of spending around 3 weeks thinking and trying - I could not make it work robust enough.

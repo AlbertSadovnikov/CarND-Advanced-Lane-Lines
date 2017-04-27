@@ -3,7 +3,8 @@ from lanelines.pipeline import process
 import numpy as np
 from sklearn.externals import joblib
 from lanelines.state import State
-import pickle
+from argparse import ArgumentParser
+
 
 # load calibration data
 cal_data = np.load('data/calibration.npz')
@@ -19,10 +20,10 @@ def process_frame(frame):
     result = process(frame, cal_data, pt_data, clf, state)
     return result
 
-
-clip = VideoFileClip("./videos/project_video.mp4")
-output_video = "./output_videos/project_video.mp4"
+parser = ArgumentParser(description='CarND Advanced lane finder')
+parser.add_argument('--video', help='Path to video file', dest='video_filename', required=True)
+parser.add_argument('--output', help='Path to output video file', dest='out_filename', required=True)
+args = parser.parse_args()
+clip = VideoFileClip(args.video_filename)
 output_clip = clip.fl_image(process_frame)
-output_clip.write_videofile(output_video, audio=False, progress_bar=True)
-#with open('state_file.pkl', 'wb') as outfile:
-#    pickle.dump(state, outfile, pickle.HIGHEST_PROTOCOL)
+output_clip.write_videofile(args.out_filename, audio=False, progress_bar=True)
