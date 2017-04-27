@@ -17,6 +17,13 @@
 
 Goal of the project is to write a software pipeline to identify the lane boundaries in a video.
 
+# To be fixed
+
+* increase trapezoid height to match the one in curvature chapter  (+ 2 dashes)
+* increase trapezoid target dimensions x 2
+* compute parabolas over linspace, change pixels to meters, refit parabola, check the scalings
+* recompute curvature
+* improve state (Kalman?)
 
 # The Project
 ---
