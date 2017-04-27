@@ -4,6 +4,41 @@ from sklearn.preprocessing import PolynomialFeatures
 import cv2
 
 
+def curvature(a, b, x_s, y_s, y_m):
+    #
+    # Curvature formula from http://www.intmath.com/applications-differentiation/8-radius-curvature.php
+    #
+    # R(x) = ( (1 + f'(x)^2)^(3/2) ) / |f''(x)| ,
+    # which in quadratic case:
+    # R(x) = ( (1 + (2Ax + B) ^ 2) ^ (3/2) ) / |2A|
+    #
+    # y = Ax^2 + Bx + C
+    #
+    # y = k * y_m
+    # x = l * x_m
+    # substituting
+    #
+    # k * y_m = A(l*x_m)^2 + B * l * x_m + C
+    # y_m = (A * l^2 / k) * x_m^2 + (B * l / k) * x_m + C / k
+    #
+    # A_m = A * l^2 / k
+    # B_m = B * l / k
+    # C_m = C / k
+    #
+    # to get curvature of the y_m(x_m) at x_point_m the formula will be
+    #
+    # R(x_m) = ( (1 + (2A_m * x_m + B_m) ^ 2) ^ (3/2) ) / |2A_m|
+    #
+    # substituting
+    # R(x_m) = ( (1 + (2 * A * l^2 / k * x_m + B * l / k) ^ 2) ^ (3/2) ) / |2 * A * l^2 / k|
+    #
+    # in our case, x and y are swapped, l = y_s, k = x_s (since the parabola is x = f(y))
+    #
+    # so the formula is
+
+    return (1 + (2 * a * (y_s ** 2) / x_s * y_m + b * y_s / x_s) ** 2) ** 1.5 / np.absolute(2 * a * y_s ** 2 / x_s)
+
+
 def quadratic_ransac_fit(x, y):
     poly_2 = PolynomialFeatures(degree=2)
     x_2 = poly_2.fit_transform(x.reshape(-1, 1))

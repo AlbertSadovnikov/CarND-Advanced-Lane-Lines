@@ -1,4 +1,5 @@
 import numpy as np
+import lanelines.curves as llc
 
 
 class State:
@@ -38,13 +39,21 @@ class State:
 
     @property
     def curvature(self):
-        y = 128
-        ym_per_pix = 20 / 256  # meters per pixel in y dimension
+        y_estimate_at = 10  # let's estimate curvature 10 meters ahead
+        x_pixels_per_meter = 256 / 3.7  # taking the lane width to be 3.7 meters
+        #
+        # in the course photo the lane length is estimated to be 30 meters,
+        # from this perspective, my should be around 20
+        # https://d17h27t6h515a5.cloudfront.net/topher/2016/December/58449a23_color-fit-lines/color-fit-lines.jpg
+        #
+        y_pixels_per_meter = 256 / 20
 
-        left_curve = ((1 + (2 * self.left_lane[2] * y * ym_per_pix + self.left_lane[1]) ** 2) ** 1.5) \
-                     / np.absolute(2 * self.left_lane[2])
-        right_curve = ((1 + (2 * self.right_lane[2] * y * ym_per_pix + self.right_lane[1]) ** 2) ** 1.5) \
-                      / np.absolute(2 * self.right_lane[2])
+        left_curve = llc.curvature(self.left_lane[2], self.left_lane[1],
+                                   x_pixels_per_meter, y_pixels_per_meter, y_estimate_at)
+
+        right_curve = llc.curvature(self.right_lane[2], self.right_lane[1],
+                                    x_pixels_per_meter, y_pixels_per_meter, y_estimate_at)
+
         # no need to report both, assuming lane lines are parallel
         return (left_curve + right_curve) / 2
 
