@@ -19,7 +19,7 @@ class State:
             left_candidate, right_candidate = lane1, lane0
 
         # only candidates with certain x0
-        if 50 < left_candidate[0] < 350 and np.abs(left_candidate[1]) < 1 and np.abs(left_candidate[2]) < 0.01:
+        if 120 < left_candidate[0] < 320 and np.abs(left_candidate[1]) < 0.75 and np.abs(left_candidate[2]) < 0.001:
             self._left_lane_measurements.append(left_candidate)
             if len(self._left_lane_measurements) < 5:
                 self._left_lane = self._left_lane_measurements[-1]
@@ -28,7 +28,7 @@ class State:
                 delta = self._left_lane_measurements[-1] - self._left_lane
                 self._left_lane = self._left_lane + 0.2 * delta
 
-        if 300 < right_candidate[0] < 526 and np.abs(right_candidate[1]) < 1 and np.abs(right_candidate[2]) < 0.01:
+        if 320 < right_candidate[0] < 520 and np.abs(right_candidate[1]) < 0.75 and np.abs(right_candidate[2]) < 0.001:
             self._right_lane_measurements.append(right_candidate)
             if len(self._right_lane_measurements) < 5:
                 self._right_lane = self._right_lane_measurements[-1]

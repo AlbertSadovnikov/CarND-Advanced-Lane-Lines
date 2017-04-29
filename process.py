@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.externals import joblib
 from lanelines.state import State
 from argparse import ArgumentParser
-
+import cv2
 
 # load calibration data
 cal_data = np.load('data/calibration.npz')
@@ -17,8 +17,8 @@ state = State()
 
 
 def process_frame(frame):
-    result = process(frame, cal_data, pt_data, clf, state)
-    return result
+    result = process(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR), cal_data, pt_data, clf, state)
+    return cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
 
 parser = ArgumentParser(description='CarND Advanced lane finder')
 parser.add_argument('--video', help='Path to video file', dest='video_filename', required=True)
